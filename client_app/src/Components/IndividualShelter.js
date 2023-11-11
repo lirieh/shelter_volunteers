@@ -12,6 +12,20 @@ const IndividualShelter = (props) => {
   const [endTime, setEndDate] = useState(
     setHours(setMinutes(new Date(), 0), new Date().getHours() + 2)
   );
+    
+const filterPastStartTime = (time) => {
+  const currentDate = new Date();
+  const selectedDate = new Date(time);
+  return  currentDate.getTime() < selectedDate.getTime();
+  };
+    
+const filterPastEndTime = (time) => {
+   const currentDate = new Date();
+   const selectedDate = new Date(time);
+   currentDate.setHours(currentDate.getHours() + 1);
+   return  currentDate.getTime() < selectedDate.getTime();
+   };
+    
 
   function addShift() {
     if (props.addShiftFunction) {
@@ -35,15 +49,21 @@ const IndividualShelter = (props) => {
     }
     setStartDate(date);
   }
-
-  function modifyEnd(date) {
-    if (startTime.getTime() >= date) {
-      setEndDate(setHours(date, date.getHours() + 1));
-      setStartDate(date);
-    } else {
-      setEndDate(date);
+    
+    
+    function modifyEnd(date) {
+      const earliestEndDate = new Date();
+      earliestEndDate.setHours(earliestEndDate.getHours() + 1);
+        
+        if (earliestEndDate <= date) {
+            setEndDate(date)
+            setStartDate((setHours(date,date.getHours()-1)))
+        } else {
+            setEndDate(earliestEndDate)
+            setStartDate((setHours(earliestEndDate,earliestEndDate.getHours()-1)))
+        }
     }
-  }
+
 
   return (
     <div>
@@ -61,18 +81,24 @@ const IndividualShelter = (props) => {
             <DatePicker
               className="date-picker"
               selected={startTime}
+              filterTime={filterPastStartTime}
               onChange={(date) => modifyStart(date)}
               showTimeSelect
               dateFormat="M/dd/yy h:mm aa"
+              minDate={new Date()}
+              showDisabledMonthNavigation
             />
             <br />
             <br />
             <label>End Time: </label>
             <DatePicker
               selected={endTime}
+              filterTime={filterPastEndTime}
               onChange={(date) => modifyEnd(date)}
               showTimeSelect
               dateFormat="M/dd/yy h:mm aa"
+              minDate={new Date()}
+              showDisabledMonthNavigation
             />
             <br />
             <br />
